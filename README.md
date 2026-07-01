@@ -2,7 +2,7 @@
 
 > A step-by-step data cleaning workflow built in **MySQL 8.0**, turning a messy, real-world dataset into a clean, reliable table that's ready for analysis.
 
-This project is based on the excellent data cleaning tutorial by **[Alex The Analyst](https://github.com/AlexTheAnalyst/)** — go check out his channel and GitHub, he puts out fantastic beginner-to-advanced SQL content.
+
 
 ---
 
@@ -19,7 +19,7 @@ Raw data almost never comes clean. This dataset had duplicate rows, inconsistent
 - **Data Type Conversion** — turning text into a real date format
 - **Basic Schema Cleanup** — removing columns and rows that aren't useful anymore
 
-**Reference script:** [`Global layoffs_analysis data cleaning.sql`](./Global%20layoffs_analysis%20data%20cleaning.sql)
+**Reference script:** [`global_layoffs_cleaning.sql`](./global_layoffs_cleaning.sql)
 
 ---
 
@@ -297,5 +297,5 @@ Every change in this project was made on a **copy** of the raw data (`layoff_sta
 This project follows the data cleaning walkthrough taught by **Alex The Analyst** — a fantastic free resource for anyone learning SQL.
 Check out his work here: **[github.com/AlexTheAnalyst](https://github.com/AlexTheAnalyst/)**
 
-**Full script:** [`Global layoffs_analysis data cleaning.sql`](./Global%20layoffs_analysis%20data%20cleaning.sql)
+**Full script:** [`global_layoffs_cleaning.sql`](./global_layoffs_cleaning.sql)
 **Author:** Umair Asad · [github.com/Umair-Asad2001](https://github.com/Umair-Asad2001)
