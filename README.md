@@ -83,7 +83,7 @@ WHERE row_num > 1;
 
 | Checking Only a Few Columns | Checking All 9 Columns |
 |---|---|
-| ![Oda Legitimate Entry Example](screenshots/1-removing-duplicates/1.1-legitimate-entries/oda-legitimate-entry.png) | ![True Duplicates Isolated](screenshots/1-removing-duplicates/overall-before-after/layoffs-before-dedup.png) |
+| ![Oda Legitimate Entry Example](screenshots/1-removing-duplicates/1.1-legitimate-entries/oda-legitimate-entry.png) | ![True Duplicates Isolated](screenshots/1-removing-duplicates/1.2-overall-picture-before-after/layoffs-before-dedup.png) |
 
 > **A Real Roadblock — MySQL Won't Let You Delete From a CTE**
 > Once I found the duplicates, my first instinct was to delete them straight from the CTE (the temporary result I used to run the `ROW_NUMBER()` query). That doesn't work in MySQL 8.0 — **you simply can't run `DELETE` or `UPDATE` directly on a CTE.** On top of that, the `row_num` column only exists inside that temporary query — it's not a real column in the actual table, so I couldn't filter on it there either.
@@ -125,7 +125,7 @@ From this point on, every cleaning step in this project runs on `layoff_staging2
 
 | Duplicates Flagged (`row_num > 1`) | Duplicates Gone (After Deleting) |
 |---|---|
-| ![Duplicates Flagged Before Deletion](screenshots/1-removing-duplicates/overall-before-after/layoffs-before-dedup.png) | ![Clean Dataset After Deletion](screenshots/1-removing-duplicates/overall-before-after/layoffs-after-dedup.png) |
+| ![Duplicates Flagged Before Deletion](screenshots/1-removing-duplicates/1.2-overall-picture-before-after/layoffs-before-dedup.png) | ![Clean Dataset After Deletion](screenshots/1-removing-duplicates/1.2-overall-picture-before-after/layoffs-after-dedup.png) |
 
 ---
 
