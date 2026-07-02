@@ -1,6 +1,6 @@
 # Global Layoffs — SQL Data Cleaning Project
 
-> A step-by-step data cleaning workflow built in **MySQL 8.0**, turning a messy, real-world dataset into a clean, reliable table that's ready for analysis.
+A step-by-step data cleaning workflow built in **MySQL 8.0**, turning a messy, real-world dataset into a clean, reliable table that's ready for analysis.
 
 
 
@@ -14,7 +14,7 @@ Raw data almost never comes clean. This dataset had duplicate rows, inconsistent
 - **MySQL 8.0**
 - **Window Functions** — specifically `ROW_NUMBER()`, used to find duplicate rows
 - **Self-Joins** — using a table to fill in its own missing information
-- **CTEs (Common Table Expressions)** and a real limitation I ran into with them
+- **CTEs (Common Table Expressions)** and the specific MySQL 8.0 limitation I ran into while using them
 - **Staging Tables** — working on a copy of the data instead of the original
 - **Data Type Conversion** — turning text into a real date format
 - **Basic Schema Cleanup** — removing columns and rows that aren't useful anymore
@@ -83,7 +83,7 @@ WHERE row_num > 1;
 
 | Checking Only a Few Columns | Checking All 9 Columns |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Oda Legitimate Entry Example](screenshots/1-removing-duplicates/1.1-legitimate-entries/oda-legitimate-entry.png) | ![True Duplicates Isolated](screenshots/1-removing-duplicates/overall-before-after/layoffs-before-dedup.png) |
 
 > **A Real Roadblock — MySQL Won't Let You Delete From a CTE**
 > Once I found the duplicates, my first instinct was to delete them straight from the CTE (the temporary result I used to run the `ROW_NUMBER()` query). That doesn't work in MySQL 8.0 — **you simply can't run `DELETE` or `UPDATE` directly on a CTE.** On top of that, the `row_num` column only exists inside that temporary query — it's not a real column in the actual table, so I couldn't filter on it there either.
@@ -125,17 +125,17 @@ From this point on, every cleaning step in this project runs on `layoff_staging2
 
 | Duplicates Flagged (`row_num > 1`) | Duplicates Gone (After Deleting) |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Duplicates Flagged Before Deletion](screenshots/1-removing-duplicates/overall-before-after/layoffs-before-dedup.png) | ![Clean Dataset After Deletion](screenshots/1-removing-duplicates/overall-before-after/layoffs-after-dedup.png) |
 
 ---
 
 ## 2. Cleaning Up and Standardizing the Data
 
-**The problem:** even after removing duplicates, the data had small inconsistencies — extra spaces, different spellings for the same thing, and dates saved as plain text instead of real dates. These small issues can cause big problems later, like the same company being counted as two different groups. Below, each one is treated as its own mini-phase: what went wrong, why it matters, and exactly how it was fixed.
+**The problem:** even after removing duplicates, the data had small inconsistencies — extra spaces, different spellings for the same thing, and dates saved as plain text instead of real dates. These small issues can cause big problems later, like the same company being counted as two different groups. To establish a clean foundation for reliable reporting, I addressed these inconsistencies column by column to unify the schema.
 
 ### 2.1 Standardizing the Company Column by Removing Extra Spaces
 
-**The Problem:** Text data brought in from spreadsheets or CSV files often carries invisible extra spaces at the start or end of a word — for example, `" Google"` instead of `"Google"`. You can't always see this just by looking at it, but SQL can. If it's not fixed, SQL treats `" Google"` and `"Google"` as two completely different companies, which means one company's layoffs would get split across two separate rows instead of being grouped together correctly.
+**The Problem:** Text data brought in from spreadsheets or CSV files often carries invisible extra spaces at the start or end of a word — for example, `" Google"` instead of `"Google"`. We can't always see this just by looking at it, but SQL can. If it's not fixed, SQL treats `" Google"` and `"Google"` as two completely different companies, which means one company's layoffs would get split across two separate rows instead of being grouped together correctly.
 
 **The Solution:** This phase used the `TRIM()` function to automatically strip away any hidden leading or trailing spaces across the **entire** `company` column in one go — no need to check row by row:
 
@@ -148,11 +148,11 @@ SET company = TRIM(company);
 
 | Before | After |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Company Before Trimming](screenshots/2-data-standardization/2.1-trim-company-spaces/company-before-trim.png) | ![Company After Trimming](screenshots/2-data-standardization/2.1-trim-company-spaces/company-after-trim.png) |
 
 ### 2.2 Unifying Multiple Variations of the Same Industry Name
 
-**The Problem:** When data is entered by hand (or pulled together from different sources), the same thing often ends up labeled in several different ways. In this dataset, the industry column had **`Crypto`**, **`Crypto Currency`**, and **`CryptoCurrency`** — three separate labels all describing the exact same industry. SQL has no way of knowing these are the same thing on its own, so it treats them as three unrelated categories. That breaks any report or chart that groups layoffs by industry, since the real Crypto totals end up split into three smaller, incomplete pieces.
+**The Problem:** When data is entered by hand (or pulled together from different sources), the same thing often ends up labeled in several different ways. In this dataset, the industry column has variations in same company names like **`Crypto`**, **`Crypto Currency`**, and **`CryptoCurrency`** — three separate labels all describing the exact same industry. SQL has no way of knowing these are the same thing on its own, so it treats them as three unrelated categories. That breaks any report or chart that groups layoffs by industry, since the real Crypto totals end up split into three smaller, incomplete pieces.
 
 **The Solution:** This phase involved finding every variation of the label and updating them all to one single, official name — `'Crypto'` — so the data rolls up cleanly into one accurate group:
 
@@ -164,13 +164,13 @@ WHERE industry IN ('Crypto Currency', 'CryptoCurrency');
 
 | Before (Three Different Labels) | After (One Consistent Label) |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Crypto Labels Before Standardization](screenshots/2-data-standardization/2.2-unify-industry-names/crypto-before-unify.png) | ![Crypto Labels After Standardization](screenshots/2-data-standardization/2.2-unify-industry-names/crypto-after-unify.png) |
 
 ### 2.3 Fixing the Country Column by Removing Trailing Periods
 
 **The Problem:** Small typo-style errors — like a stray period accidentally left at the end of a name — are easy for a human to overlook but cause real problems for a database. If some rows say `Country` and others say `Country.`, any filter, map, or "group by country" query will treat them as two different places, quietly skewing your results.
 
-**The Solution:** This was handled as a general clean-up phase across the whole `country` column, rather than a one-off fix. The clearest example in this dataset was **United States** — some rows had `United States`, while others had `United States.` with a trailing period. To fix this safely (without risking damage to the actual country name), the `TRIM(TRAILING '.' FROM country)` function was used, which only removes a period if it's sitting at the very end of the text:
+**The Solution:** To resolve this efficiently across the entire dataset, I targeted the country column using the TRIM(TRAILING '.' FROM country) function.The clearest example in this dataset was **United States** — some rows had `United States`, while others had `United States.` with a trailing period. To fix this safely (without risking damage to the actual country name), the `TRIM(TRAILING '.' FROM country)` function was used, which only removes a period if it's sitting at the very end of the text:
 
 ```sql
 UPDATE layoff_staging2
@@ -179,11 +179,13 @@ SET country = TRIM(TRAILING '.' FROM country);
 
 | Before | After |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Country Period Before Fix](screenshots/2-data-standardization/2.3-fix-country-periods/country-before-fixing.png) | ![Country Period After Fix](screenshots/2-data-standardization/2.3-fix-country-periods/country-after-fixing.png) |
 
 ### 2.4 Hardening the Schema by Converting the Date Column From Text to Date Type
 
-**The Problem:** When data is imported from a flat file (like a CSV), date values almost always come in as plain **text** — for example, `12/16/2022` — rather than an actual date. Because it's just text to SQL, you can't run any real time-based analysis on it: no sorting chronologically, no filtering by date range, and no tracking trends by month or year. SQL just sees a string of characters, not a calendar date.
+**The Problem:** When data is imported from a flat file (like a CSV), date values almost always enter the database as plain **text** strings (for example, `12/16/2022`) rather than true date formats. While it is entirely possible to adjust and correct this column's data type using the import wizard settings during the initial data load, I intentionally chose to leave it as text so that I could demonstrate how to clean and convert it manually using SQL queries. 
+
+Because it was left as raw text, SQL initially viewed it as just a string of characters instead of a calendar date. This meant no real time-based analysis could be run—there was no way to sort chronologically, filter by specific date ranges, or track layoffs by month or year until the formatting was fixed.
 
 **The Solution:** This phase was handled in two steps.
 
@@ -203,11 +205,11 @@ MODIFY COLUMN `date` DATE;
 
 | Date Values Before Reformatting | Date Values After Reformatting |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Date Values Raw Text](screenshots/2-data-standardization/2.4-convert-date-type/date-values-before.png) | ![Date Values Formatted](screenshots/2-data-standardization/2.4-convert-date-type/date-values-after.png) |
 
 | Column Type Before (Text) | Column Type After (Date) |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Schema Type Text](screenshots/2-data-standardization/2.4-convert-date-type/date-type-before.png) | ![Schema Type Date](screenshots/2-data-standardization/2.4-convert-date-type/date-type-after.png) |
 
 ---
 
