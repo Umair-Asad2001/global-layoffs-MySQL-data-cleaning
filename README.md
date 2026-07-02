@@ -229,7 +229,7 @@ WHERE industry = '';
 
 | Blank Industry Value | Proper `NULL` Value |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Blank Industry String](screenshots/2-data-standardization/3.0-handling-nulls/airbnb-blank-before-null.png) | ![Industry Set To NULL](screenshots/2-data-standardization/3.0-handling-nulls/airbnb-blank-after-null.png) |
 
 ### 3.2 Using a Self-Join to Fill in the Gaps
 
@@ -246,11 +246,11 @@ WHERE t1.industry IS NULL
   AND t2.industry IS NOT NULL;
 ```
 
-This one query fixes every matching row at once — no manual research needed, even across thousands of rows. For **Airbnb**, one row already had `industry = 'Travel'`, while a second row had a missing industry. The self-join found the match and filled it in automatically.
+This one query fixes every matching row at once — no manual research needed, even across thousands of rows. For example, for **Airbnb**, one row already had `industry = 'Travel'`, while a second row had a missing industry. The self-join found the match and filled it in automatically.
 
 | Airbnb Row Before | Airbnb Row After the Self-Join |
 |---|---|
-| ![Insert Screenshot Link Here](your-screenshot-link.png) | ![Insert Screenshot Link Here](your-screenshot-link.png) |
+| ![Airbnb Row Before](screenshots/2-data-standardization/3.0-handling-nulls/airbnb-before-self-join.png) | ![Airbnb Row After the Self-Join](screenshots/2-data-standardization/3.0-handling-nulls/airbnb-after-self-join.png) |
 
 > **A quick sanity check:** after running this, only **Bally's Interactive** was still left with a missing industry — because it didn't have a second row anywhere in the table to copy the value from. That actually confirms the self-join worked exactly as intended: it fills in what it *can* find, and correctly leaves alone what it *can't*.
 
@@ -272,7 +272,7 @@ WHERE total_laid_off IS NULL
 
 ### 4.2 Removing the Helper Column We Created
 
-Remember the `row_num` column from **Section 1**? It was only ever there to help find and remove duplicates. Now that the duplicates are gone, it's just extra clutter, so it gets dropped:
+As the `row_num` column from **Section 1**? It was only ever there to help find and remove duplicates. Now that the duplicates are gone, it's just extra clutter, so it gets dropped:
 
 ```sql
 ALTER TABLE layoff_staging2
@@ -294,10 +294,15 @@ Every change in this project was made on a **copy** of the raw data (`layoff_sta
 
 ---
 
-## 🙏 Credit
+## 🤝 Credits & Acknowledgments
 
-This project follows the data cleaning walkthrough taught by **Alex The Analyst** — a fantastic free resource for anyone learning SQL.
-Check out his work here: **[github.com/AlexTheAnalyst](https://github.com/AlexTheAnalyst/)**
+This project was built following the data cleaning methodology taught by **Alex The Analyst**, an invaluable community resource for mastering SQL data pipelines.
+* **Original Content:** [Alex The Analyst YouTube]([https://github.com/AlexTheAnalyst](https://youtu.be/4UltKCnnnTA?si=GkSUVPEkL83K5Cg6))
 
-**Full script:** [`global_layoffs_cleaning.sql`](./global_layoffs_cleaning.sql)
-**Author:** Umair Asad · [github.com/Umair-Asad2001](https://github.com/Umair-Asad2001)
+---
+
+### 📂 Project Artifacts
+* **Complete SQL Pipeline:** Code for the full data cleaning script can be found in [`global_layoffs_cleaning.sql`](./global_layoffs_cleaning.sql).
+
+**Implemented By:** Umair Asad  
+🔗 [GitHub Portfolio](https://github.com/Umair-Asad2001) · ✉️ [Connect on LinkedIn]([https://www.linkedin.com](https://www.linkedin.com/in/umair-data/))
