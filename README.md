@@ -297,7 +297,7 @@ Every change in this project was made on a **copy** of the raw data (`layoff_sta
 ## 🤝 Credits & Acknowledgments
 
 This project was built following the data cleaning methodology taught by **Alex The Analyst**, an invaluable community resource for mastering SQL data pipelines.
-* **Original Content:** [Alex The Analyst YouTube]((https://youtu.be/4UltKCnnnTA?si=GkSUVPEkL83K5Cg6))
+* **Original Content:** [Data Cleaning in MySQL | Full Project](https://youtu.be/4UltKCnnnTA?si=2kMLRr0yeqTwZG5T)
 
 ---
 
